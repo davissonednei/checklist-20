@@ -2,6 +2,35 @@
    CHECKLIST DE VIATURAS - APLICAÇÃO PRINCIPAL
    ======================================== */
 
+// Função para obter data/hora no fuso horário de Brasília
+function obterDataHoraBrasilia() {
+    const agora = new Date();
+    // Formatar para o fuso de Brasília (America/Sao_Paulo)
+    const opcoes = {
+        timeZone: 'America/Sao_Paulo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    };
+    const formatter = new Intl.DateTimeFormat('pt-BR', opcoes);
+    const partes = formatter.formatToParts(agora);
+    
+    let ano, mes, dia, hora, minuto;
+    partes.forEach(p => {
+        if (p.type === 'year') ano = p.value;
+        if (p.type === 'month') mes = p.value;
+        if (p.type === 'day') dia = p.value;
+        if (p.type === 'hour') hora = p.value;
+        if (p.type === 'minute') minuto = p.value;
+    });
+    
+    // Formato para input datetime-local: YYYY-MM-DDTHH:MM
+    return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
+}
+
 // Estado global da aplicação
 const estado = {
     responsavel: '',
@@ -38,10 +67,8 @@ function inicializarApp() {
         inicializarSupabase();
     }
     
-    // Preencher data/hora atual
-    const agora = new Date();
-    const dataFormatada = agora.toISOString().slice(0, 16);
-    document.getElementById('data-hora').value = dataFormatada;
+    // Preencher data/hora atual (fuso de Brasília)
+    document.getElementById('data-hora').value = obterDataHoraBrasilia();
 
     // Event listener do formulário de identificação
     document.getElementById('form-identificacao').addEventListener('submit', (e) => {
@@ -84,10 +111,8 @@ function novoChecklist() {
     
     resetarEstado();
     
-    // Atualizar data/hora para agora
-    const agora = new Date();
-    const dataFormatada = agora.toISOString().slice(0, 16);
-    document.getElementById('data-hora').value = dataFormatada;
+    // Atualizar data/hora para agora (fuso de Brasília)
+    document.getElementById('data-hora').value = obterDataHoraBrasilia();
     document.getElementById('graduacao-nome').value = '';
     
     renderizarViaturas();
