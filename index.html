@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#dc2626">
+    <meta name="description" content="Checklist de Viaturas do Quartel">
+    <title>Checklist de Viaturas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="img/icon-192.png">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+    <link rel="stylesheet" href="css/style.css?v=5">
+</head>
+<body>
+    <div id="app">
+        <!-- TELA 1: Identificação -->
+        <section id="tela-identificacao" class="tela ativa">
+            <div class="container">
+                <header class="header">
+                    <div class="logo">🚒</div>
+                    <h1>Checklist de Viaturas</h1>
+                    <p class="subtitulo">Sistema de Verificação Diária</p>
+                </header>
+
+                <form id="form-identificacao" class="form-card">
+                    <div class="campo">
+                        <label for="graduacao-nome">Graduação e Nome de Guerra</label>
+                        <input 
+                            type="text" 
+                            id="graduacao-nome" 
+                            placeholder="Ex: Cb João Silva"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="data-hora">Data e Hora</label>
+                        <input 
+                            type="datetime-local" 
+                            id="data-hora"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-grande">
+                        Iniciar Checklist →
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TELA 2: Seleção de Viatura -->
+        <section id="tela-viaturas" class="tela">
+            <div class="container">
+                <header class="header-interno">
+                    <button class="btn-voltar" onclick="novoChecklist()">← Novo Checklist</button>
+                    <h2>Selecione a Viatura</h2>
+                </header>
+
+                <div id="lista-viaturas" class="lista-viaturas">
+                    <!-- Viaturas serão inseridas via JS -->
+                </div>
+
+                <div id="progresso-viaturas" class="progresso-container">
+                    <!-- Progresso será inserido via JS -->
+                </div>
+
+                <div class="acoes-viaturas">
+                    <button id="btn-pdf-completo" class="btn-progresso" onclick="tentarGerarPDFCompleto()">
+                        <div class="btn-progresso-fundo" id="btn-progresso-barra"></div>
+                        <span class="btn-progresso-texto">
+                            <span id="btn-progresso-icon">📄</span>
+                            <span id="btn-progresso-label">Gerar PDF do Checklist Completo</span>
+                            <span id="btn-progresso-status">(0/4)</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 3: Checklist -->
+        <section id="tela-checklist" class="tela">
+            <div class="container">
+                <header class="header-interno">
+                    <button class="btn-voltar" onclick="voltarTela('tela-viaturas')">← Voltar</button>
+                    <h2 id="titulo-viatura">ABTS 01</h2>
+                </header>
+
+                <div id="abas-categorias" class="abas">
+                    <!-- Abas serão inseridas via JS -->
+                </div>
+
+                <div id="conteudo-checklist" class="checklist-conteudo">
+                    <!-- Itens do checklist serão inseridos via JS -->
+                </div>
+
+                <div class="acoes-checklist">
+                    <button class="btn btn-secondary" onclick="salvarEVoltar()">
+                        ✓ Salvar e Voltar
+                    </button>
+                    <button class="btn btn-primary" onclick="finalizarChecklist()">
+                        Ver Resumo →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 4: Resumo e Envio -->
+        <section id="tela-resumo" class="tela">
+            <div class="container">
+                <header class="header-interno">
+                    <button class="btn-voltar" onclick="voltarTela('tela-checklist')">← Voltar</button>
+                    <h2>Resumo do Checklist</h2>
+                </header>
+
+                <div id="resumo-conteudo" class="resumo-card">
+                    <!-- Resumo será inserido via JS -->
+                </div>
+
+                <div class="acoes-finais">
+                    <button class="btn btn-success btn-grande" onclick="gerarPDF()">
+                        📄 Gerar PDF
+                    </button>
+                    <button class="btn btn-whatsapp btn-grande" onclick="compartilharWhatsApp()">
+                        📱 Enviar via WhatsApp
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TELA 5: Assinatura Digital -->
+        <section id="tela-assinatura" class="tela">
+            <div class="container">
+                <header class="header-interno">
+                    <button class="btn-voltar" onclick="voltarTela('tela-viaturas')">← Voltar</button>
+                    <h2>Assinatura Digital</h2>
+                </header>
+
+                <div class="assinatura-card">
+                    <p class="assinatura-instrucao">Assine com o dedo no campo abaixo:</p>
+                    
+                    <div class="canvas-container">
+                        <canvas id="canvas-assinatura"></canvas>
+                    </div>
+
+                    <div class="assinatura-acoes">
+                        <button class="btn btn-secondary" onclick="limparAssinatura()">
+                            🗑️ Limpar
+                        </button>
+                        <button class="btn btn-primary" onclick="confirmarAssinatura()">
+                            ✓ Confirmar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="info-assinatura">
+                    <p>📋 <strong>Responsável:</strong> <span id="info-responsavel"></span></p>
+                    <p>📅 <strong>Data/Hora:</strong> <span id="info-datahora"></span></p>
+                    <p>🚒 <strong>Viaturas:</strong> <span id="info-viaturas"></span></p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="js/data.js?v=6"></script>
+    <script src="js/supabase-config.js?v=6"></script>
+    <script src="js/app.js?v=6"></script>
+    <script>
+        // Registrar Service Worker para funcionar offline
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker registrado!'))
+                .catch(err => console.log('Erro no SW:', err));
+        }
+    </script>
+</body>
+</html>

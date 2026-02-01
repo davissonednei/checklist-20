@@ -1,0 +1,766 @@
+/* ========================================
+   CHECKLIST DE VIATURAS - ESTILOS
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cor-primaria: #dc2626;
+    --cor-primaria-escura: #b91c1c;
+    --cor-sucesso: #16a34a;
+    --cor-sucesso-escura: #15803d;
+    --cor-whatsapp: #25d366;
+    --cor-whatsapp-escura: #1da851;
+    --cor-fundo: #f3f4f6;
+    --cor-card: #ffffff;
+    --cor-texto: #1f2937;
+    --cor-texto-claro: #6b7280;
+    --cor-borda: #e5e7eb;
+    --sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --sombra-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+
+/* ========================================
+   TELAS
+   ======================================== */
+
+.tela {
+    display: none;
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 100px;
+}
+
+.tela.ativa {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.header {
+    text-align: center;
+    padding: 40px 0;
+}
+
+.logo {
+    font-size: 64px;
+    margin-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--cor-primaria);
+    margin-bottom: 8px;
+}
+
+.subtitulo {
+    color: var(--cor-texto-claro);
+    font-size: 14px;
+}
+
+.header-interno {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.header-interno h2 {
+    font-size: 20px;
+    flex: 1;
+}
+
+.btn-voltar {
+    background: none;
+    border: none;
+    color: var(--cor-primaria);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px 0;
+    font-weight: 500;
+}
+
+/* ========================================
+   FORMULÁRIO
+   ======================================== */
+
+.form-card {
+    background: var(--cor-card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+}
+
+.campo {
+    margin-bottom: 20px;
+}
+
+.campo label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--cor-texto);
+}
+
+.campo input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 16px;
+    border: 2px solid var(--cor-borda);
+    border-radius: 10px;
+    transition: border-color 0.2s;
+}
+
+.campo input:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+}
+
+/* ========================================
+   BOTÕES
+   ======================================== */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-grande {
+    width: 100%;
+    padding: 16px 24px;
+    font-size: 18px;
+}
+
+.btn-primary {
+    background: var(--cor-primaria);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--cor-primaria-escura);
+}
+
+.btn-secondary {
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    border: 2px solid var(--cor-borda);
+}
+
+.btn-success {
+    background: var(--cor-sucesso);
+    color: white;
+}
+
+.btn-success:hover {
+    background: var(--cor-sucesso-escura);
+}
+
+.btn-whatsapp {
+    background: var(--cor-whatsapp);
+    color: white;
+}
+
+.btn-whatsapp:hover {
+    background: var(--cor-whatsapp-escura);
+}
+
+/* ========================================
+   LISTA DE VIATURAS
+   ======================================== */
+
+.lista-viaturas {
+    display: grid;
+    gap: 12px;
+}
+
+.viatura-card {
+    background: var(--cor-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--sombra);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.viatura-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-lg);
+}
+
+.viatura-card:active {
+    transform: scale(0.98);
+}
+
+.viatura-icone {
+    font-size: 40px;
+}
+
+.viatura-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cor-texto);
+}
+
+.viatura-info p {
+    font-size: 14px;
+    color: var(--cor-texto-claro);
+}
+
+/* ========================================
+   ABAS DE CATEGORIAS
+   ======================================== */
+
+.abas {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.aba {
+    flex-shrink: 0;
+    padding: 10px 20px;
+    background: var(--cor-card);
+    border: 2px solid var(--cor-borda);
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.aba.ativa {
+    background: var(--cor-primaria);
+    border-color: var(--cor-primaria);
+    color: white;
+}
+
+/* ========================================
+   CHECKLIST ITENS
+   ======================================== */
+
+.checklist-conteudo {
+    background: var(--cor-card);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+}
+
+.checklist-item {
+    padding: 16px 0;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.item-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.item-nome {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.item-contador {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-contador {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--cor-borda);
+    background: var(--cor-card);
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-contador:hover {
+    background: var(--cor-fundo);
+}
+
+.btn-contador.menos:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.btn-contador.mais:hover {
+    border-color: var(--cor-sucesso);
+    color: var(--cor-sucesso);
+}
+
+.quantidade-display {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: center;
+}
+
+.quantidade-ok {
+    color: var(--cor-sucesso);
+}
+
+.quantidade-falta {
+    color: #ef4444;
+}
+
+.item-obs {
+    margin-top: 8px;
+}
+
+.item-obs input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background: var(--cor-fundo);
+}
+
+.item-obs input:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+    background: white;
+}
+
+/* ========================================
+   AÇÕES DO CHECKLIST
+   ======================================== */
+
+.acoes-checklist {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.acoes-finais {
+    display: grid;
+    gap: 12px;
+}
+
+/* ========================================
+   RESUMO
+   ======================================== */
+
+.resumo-card {
+    background: var(--cor-card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+}
+
+.resumo-header {
+    text-align: center;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--cor-borda);
+    margin-bottom: 16px;
+}
+
+.resumo-header h3 {
+    font-size: 20px;
+    color: var(--cor-primaria);
+    margin-bottom: 8px;
+}
+
+.resumo-info {
+    font-size: 14px;
+    color: var(--cor-texto-claro);
+}
+
+.resumo-categoria {
+    margin-bottom: 16px;
+}
+
+.resumo-categoria h4 {
+    font-size: 16px;
+    color: var(--cor-primaria);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+
+.resumo-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.resumo-item-ok {
+    color: var(--cor-sucesso);
+}
+
+.resumo-item-problema {
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.resumo-obs {
+    font-size: 12px;
+    color: var(--cor-texto-claro);
+    font-style: italic;
+    margin-left: 8px;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+@media (max-width: 380px) {
+    .tela {
+        padding: 16px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .form-card {
+        padding: 20px;
+    }
+
+    .acoes-checklist {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========================================
+   PROGRESSO DE VIATURAS
+   ======================================== */
+
+.progresso-container {
+    margin: 20px 0;
+}
+
+.progresso-info {
+    background: var(--cor-card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+}
+
+.progresso-texto {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: var(--cor-texto-claro);
+}
+
+.progresso-texto strong {
+    color: var(--cor-texto);
+}
+
+.progresso-barra {
+    height: 8px;
+    background: var(--cor-fundo);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progresso-preenchido {
+    height: 100%;
+    background: var(--cor-sucesso);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.acoes-viaturas {
+    margin-top: 20px;
+}
+
+/* ========================================
+   BOTÃO COM BARRA DE PROGRESSO
+   ======================================== */
+
+.btn-progresso {
+    position: relative;
+    width: 100%;
+    padding: 18px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: var(--sombra);
+}
+
+.btn-progresso:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sombra-lg);
+}
+
+.btn-progresso:active {
+    transform: scale(0.98);
+}
+
+.btn-progresso-fundo {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    transition: width 0.5s ease;
+    z-index: 1;
+}
+
+.btn-progresso-texto {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+#btn-progresso-icon {
+    font-size: 20px;
+}
+
+#btn-progresso-status {
+    font-size: 14px;
+    opacity: 0.9;
+    font-weight: 500;
+}
+
+.btn-progresso.completo {
+    animation: pulse-success 2s infinite;
+}
+
+.btn-progresso.completo .btn-progresso-fundo {
+    background: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #16a34a 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-success {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(22, 163, 74, 0);
+    }
+}
+
+.viatura-concluida {
+    border: 2px solid var(--cor-sucesso);
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.viatura-check {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--cor-sucesso);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(22, 163, 74, 0);
+    }
+}
+
+/* ========================================
+   PWA - TELA CHEIA
+   ======================================== */
+
+@media (display-mode: standalone) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* ========================================
+   TELA DE ASSINATURA DIGITAL
+   ======================================== */
+
+.assinatura-card {
+    background: var(--cor-card);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--sombra);
+    margin-bottom: 20px;
+}
+
+.assinatura-instrucao {
+    text-align: center;
+    color: var(--cor-texto-claro);
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.canvas-container {
+    background: #fff;
+    border: 3px dashed var(--cor-borda);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    touch-action: none;
+}
+
+#canvas-assinatura {
+    width: 100%;
+    height: 200px;
+    display: block;
+    cursor: crosshair;
+}
+
+.assinatura-acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.info-assinatura {
+    background: var(--cor-card);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--sombra);
+}
+
+.info-assinatura p {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cor-borda);
+    font-size: 14px;
+}
+
+.info-assinatura p:last-child {
+    border-bottom: none;
+}
+
+/* ========================================
+   INDICADOR DE STATUS (ONLINE/OFFLINE)
+   ======================================== */
+
+.status-conexao {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: var(--sombra);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.status-online {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-offline {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+}
+
+.status-online .status-dot {
+    background: #16a34a;
+}
+
+.status-offline .status-dot {
+    background: #d97706;
+}
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
