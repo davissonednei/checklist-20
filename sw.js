@@ -2,7 +2,7 @@
    SERVICE WORKER - FUNCIONALIDADE OFFLINE
    ======================================== */
 
-const CACHE_NAME = 'checklist-viaturas-v6';
+const CACHE_NAME = 'checklist-viaturas-v7';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -12,6 +12,9 @@ const urlsToCache = [
     '/js/data.js',
     '/js/supabase-config.js',
     '/manifest.json',
+    '/img/icon.svg',
+    '/img/icon-192.png',
+    '/img/icon-512.png',
     'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];

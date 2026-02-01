@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <!-- Fundo vermelho -->
+  <rect width="192" height="192" rx="40" fill="#dc2626"/>
+  
+  <!-- Caminhão de bombeiro simplificado -->
+  <g fill="white">
+    <!-- Corpo do caminhão -->
+    <rect x="30" y="90" width="132" height="50" rx="8"/>
+    
+    <!-- Cabine -->
+    <rect x="110" y="65" width="52" height="75" rx="8"/>
+    
+    <!-- Janela -->
+    <rect x="120" y="75" width="32" height="25" rx="4" fill="#dc2626"/>
+    
+    <!-- Rodas -->
+    <circle cx="60" cy="145" r="18" fill="#1f2937"/>
+    <circle cx="60" cy="145" r="8" fill="white"/>
+    <circle cx="132" cy="145" r="18" fill="#1f2937"/>
+    <circle cx="132" cy="145" r="8" fill="white"/>
+    
+    <!-- Sirene -->
+    <rect x="125" y="52" width="22" height="13" rx="4" fill="#fbbf24"/>
+    
+    <!-- Checklist símbolo -->
+    <rect x="40" y="95" width="50" height="40" rx="4" fill="#dc2626"/>
+    <rect x="48" y="102" width="25" height="4" rx="2" fill="white"/>
+    <rect x="48" y="112" width="25" height="4" rx="2" fill="white"/>
+    <rect x="48" y="122" width="25" height="4" rx="2" fill="white"/>
+    <path d="M78 105 l4 4 l8-8" stroke="white" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>
