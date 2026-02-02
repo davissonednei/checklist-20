@@ -32,22 +32,25 @@ function obterDataHoraBrasilia() {
 }
 
 // Funções helper para acessar dados da viatura
-function obterCategoriasViatura() {
-    if (!estado.viaturaSelecionada) return [];
-    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+function obterCategoriasViatura(viaturaId = null) {
+    const id = viaturaId || estado.viaturaSelecionada;
+    if (!id) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === id);
     return viatura ? viatura.categorias : [];
 }
 
-function obterMateriaisCategoria(categoriaId) {
-    if (!estado.viaturaSelecionada) return [];
-    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+function obterMateriaisCategoria(categoriaId, viaturaId = null) {
+    const id = viaturaId || estado.viaturaSelecionada;
+    if (!id) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === id);
     const chave = Number(categoriaId);
     return viatura && viatura.materiais[chave] ? viatura.materiais[chave] : [];
 }
 
-function obterTodosMateriaisViatura() {
-    if (!estado.viaturaSelecionada) return [];
-    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+function obterTodosMateriaisViatura(viaturaId = null) {
+    const id = viaturaId || estado.viaturaSelecionada;
+    if (!id) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === id);
     if (!viatura || !viatura.materiais) return [];
     return Object.values(viatura.materiais).flat();
 }
@@ -644,13 +647,13 @@ function gerarPDFCompleto(incompleto = false) {
         y += 10;
 
         // Categorias e itens
-        obterCategoriasViatura().forEach(categoria => {
+        obterCategoriasViatura(viatura.id).forEach(categoria => {
             if (y > 260) {
                 doc.addPage();
                 y = 20;
             }
 
-            const materiais = obterMateriaisCategoria(categoria.id) || [];
+            const materiais = obterMateriaisCategoria(categoria.id, viatura.id) || [];
 
             // Título da categoria
             doc.setFontSize(11);
