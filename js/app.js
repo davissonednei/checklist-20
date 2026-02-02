@@ -120,7 +120,7 @@ function inicializarApp() {
     atualizarStatusConexao();
 }
     atualizarStatusConexao();
-}
+
 
 function resetarEstado() {
     estado.responsavel = '';

@@ -2,7 +2,7 @@
    SERVICE WORKER - FUNCIONALIDADE OFFLINE
    ======================================== */
 
-const CACHE_NAME = 'checklist-viaturas-v71';
+const CACHE_NAME = 'checklist-viaturas-v72';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -21,6 +21,8 @@ const urlsToCache = [
 
 // Instalar Service Worker e cachear arquivos
 self.addEventListener('install', (event) => {
+    // Força ativação imediata
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -30,48 +32,44 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Buscar do cache ou da rede
+// Buscar da REDE primeiro, depois do cache (network-first)
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request)
+        fetch(event.request)
             .then((response) => {
-                // Retorna do cache se existir
-                if (response) {
-                    return response;
-                }
-
-                // Senão, busca na rede
-                return fetch(event.request).then((response) => {
-                    // Verifica se é uma resposta válida
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
-                        return response;
-                    }
-
-                    // Clona a resposta para o cache
+                // Se a rede funcionar, atualiza o cache e retorna
+                if (response && response.status === 200) {
                     const responseToCache = response.clone();
                     caches.open(CACHE_NAME)
                         .then((cache) => {
                             cache.put(event.request, responseToCache);
                         });
-
-                    return response;
-                });
+                }
+                return response;
+            })
+            .catch(() => {
+                // Se falhar (offline), busca do cache
+                return caches.match(event.request);
             })
     );
 });
 
 // Atualizar cache quando houver nova versão
 self.addEventListener('activate', (event) => {
+    // Força controle imediato de todas as páginas
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Removendo cache antigo:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
+        Promise.all([
+            clients.claim(),
+            caches.keys().then((cacheNames) => {
+                return Promise.all(
+                    cacheNames.map((cacheName) => {
+                        if (cacheName !== CACHE_NAME) {
+                            console.log('Removendo cache antigo:', cacheName);
+                            return caches.delete(cacheName);
+                        }
+                    })
+                );
+            })
+        ])
     );
 });
