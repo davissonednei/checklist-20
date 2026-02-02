@@ -9,7 +9,7 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="img/icon-192.png">
     <link rel="apple-touch-icon" href="img/icon-192.png">
-    <link rel="stylesheet" href="css/style.css?v=60">
+    <link rel="stylesheet" href="css/style.css?v=70">
 </head>
 <body>
     <div id="app">
@@ -24,18 +24,7 @@
 
                 <form id="form-identificacao" class="form-card">
                     <div class="campo">
-                        <label for="graduacao-nome">Graduação e Nome de Guerra</label>
-                        <input 
-                            type="text" 
-                            id="graduacao-nome" 
-                            placeholder="Ex: Cb João Silva"
-                            required
-                            autocomplete="off"
-                        >
-                    </div>
-
-                    <div class="campo">
-                        <label for="data-hora">Data e Hora</label>
+                        <label for="data-hora">Data e Hora do Serviço</label>
                         <input 
                             type="datetime-local" 
                             id="data-hora"
@@ -44,7 +33,7 @@
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-grande">
-                        Iniciar Checklist →
+                        Selecionar Viatura →
                     </button>
                 </form>
             </div>
@@ -54,30 +43,37 @@
         <section id="tela-viaturas" class="tela">
             <div class="container">
                 <header class="header-interno">
-                    <button class="btn-voltar" onclick="novoChecklist()">← Novo Checklist</button>
-                    <h2>Selecione a Viatura</h2>
+                    <button class="btn-voltar" onclick="voltarTela('tela-identificacao')">← Voltar</button>
+                    <h2>Selecione sua Viatura</h2>
                 </header>
+
+                <p class="instrucao-viaturas">Cada militar deve verificar sua própria viatura</p>
 
                 <div id="lista-viaturas" class="lista-viaturas">
                     <!-- Viaturas serão inseridas via JS -->
                 </div>
-
-                <div id="progresso-viaturas" class="progresso-container">
-                    <!-- Progresso será inserido via JS -->
-                </div>
-
-                <div class="acoes-viaturas">
-                    <button id="btn-pdf-completo" class="btn-progresso" onclick="tentarGerarPDFCompleto()">
-                        <div class="btn-progresso-fundo" id="btn-progresso-barra"></div>
-                        <span class="btn-progresso-texto">
-                            <span id="btn-progresso-icon">📄</span>
-                            <span id="btn-progresso-label">Gerar PDF do Checklist Completo</span>
-                            <span id="btn-progresso-status">(0/4)</span>
-                        </span>
-                    </button>
-                </div>
             </div>
         </section>
+
+        <!-- Modal de Identificação do Responsável -->
+        <div id="modal-responsavel" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>🚒 <span id="modal-viatura-nome"></span></h3>
+                <p>Informe seu nome para iniciar o checklist:</p>
+                <div class="campo">
+                    <input 
+                        type="text" 
+                        id="modal-nome-responsavel" 
+                        placeholder="Ex: Cb João Silva"
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="modal-acoes">
+                    <button class="btn btn-secondary" onclick="fecharModalResponsavel()">Cancelar</button>
+                    <button class="btn btn-primary" onclick="confirmarResponsavel()">Iniciar →</button>
+                </div>
+            </div>
+        </div>
 
         <!-- TELA 3: Checklist -->
         <section id="tela-checklist" class="tela">
@@ -96,44 +92,18 @@
                 </div>
 
                 <div class="acoes-checklist">
-                    <button class="btn btn-secondary" onclick="salvarEVoltar()">
-                        ✓ Salvar e Voltar
-                    </button>
-                    <button class="btn btn-primary" onclick="finalizarChecklist()">
-                        Ver Resumo →
+                    <button class="btn btn-success btn-grande" onclick="finalizarEGerarRelatorio()">
+                        📄 Gerar Relatório
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- TELA 4: Resumo e Envio -->
-        <section id="tela-resumo" class="tela">
-            <div class="container">
-                <header class="header-interno">
-                    <button class="btn-voltar" onclick="voltarTela('tela-checklist')">← Voltar</button>
-                    <h2>Resumo do Checklist</h2>
-                </header>
-
-                <div id="resumo-conteudo" class="resumo-card">
-                    <!-- Resumo será inserido via JS -->
-                </div>
-
-                <div class="acoes-finais">
-                    <button class="btn btn-success btn-grande" onclick="gerarPDF()">
-                        📄 Gerar PDF
-                    </button>
-                    <button class="btn btn-whatsapp btn-grande" onclick="compartilharWhatsApp()">
-                        📱 Enviar via WhatsApp
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- TELA 5: Assinatura Digital -->
+        <!-- TELA 4: Assinatura Digital -->
         <section id="tela-assinatura" class="tela">
             <div class="container">
                 <header class="header-interno">
-                    <button class="btn-voltar" onclick="voltarTela('tela-viaturas')">← Voltar</button>
+                    <button class="btn-voltar" onclick="voltarTela('tela-checklist')">← Voltar</button>
                     <h2>Assinatura Digital</h2>
                 </header>
 
@@ -148,16 +118,16 @@
                         <button class="btn btn-secondary" onclick="limparAssinatura()">
                             🗑️ Limpar
                         </button>
-                        <button class="btn btn-primary" onclick="confirmarAssinatura()">
-                            ✓ Confirmar
+                        <button class="btn btn-primary" onclick="confirmarAssinaturaIndividual()">
+                            ✓ Confirmar e Gerar PDF
                         </button>
                     </div>
                 </div>
 
                 <div class="info-assinatura">
-                    <p>📋 <strong>Responsável:</strong> <span id="info-responsavel"></span></p>
+                    <p>🚒 <strong>Viatura:</strong> <span id="info-viatura"></span></p>
+                    <p>👤 <strong>Responsável:</strong> <span id="info-responsavel"></span></p>
                     <p>📅 <strong>Data/Hora:</strong> <span id="info-datahora"></span></p>
-                    <p>🚒 <strong>Viaturas:</strong> <span id="info-viaturas"></span></p>
                 </div>
             </div>
         </section>
@@ -167,9 +137,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="js/data.js?v=60"></script>
-    <script src="js/supabase-config.js?v=60"></script>
-    <script src="js/app.js?v=60"></script>
+    <script src="js/data.js?v=70"></script>
+    <script src="js/supabase-config.js?v=70"></script>
+    <script src="js/app.js?v=70"></script>
     <script>
         // Registrar Service Worker para funcionar offline
         if ('serviceWorker' in navigator) {

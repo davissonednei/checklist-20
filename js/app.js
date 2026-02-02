@@ -60,9 +60,10 @@ const estado = {
     responsavel: '',
     dataHora: '',
     viaturaSelecionada: null,
+    viaturaPendente: null, // Viatura aguardando confirmação de responsável
     categoriaAtiva: 1,
     checklist: {}, // { materialId: { qtdAtual: X, obs: '' } }
-    checklistsCompletos: {}, // { viaturaId: { checklist, concluido } }
+    checklistsCompletos: {}, // { viaturaId: { checklist, concluido, responsavel } }
     assinaturaDataURL: null, // Imagem da assinatura
     documentoId: null, // ID único do checklist
     documentoHash: null // Hash para verificação
@@ -114,6 +115,7 @@ function resetarEstado() {
     estado.responsavel = '';
     estado.dataHora = '';
     estado.viaturaSelecionada = null;
+    estado.viaturaPendente = null;
     estado.categoriaAtiva = 1;
     estado.checklist = {};
     estado.checklistsCompletos = {};
@@ -123,21 +125,10 @@ function resetarEstado() {
 }
 
 function novoChecklist() {
-    if (Object.keys(estado.checklistsCompletos).length > 0) {
-        const confirma = confirm(
-            '⚠️ ATENÇÃO!\n\n' +
-            'Você tem um checklist em andamento.\n' +
-            'Se voltar, todo o progresso será perdido.\n\n' +
-            'Deseja iniciar um novo checklist?'
-        );
-        if (!confirma) return;
-    }
-    
     resetarEstado();
     
     // Atualizar data/hora para agora (fuso de Brasília)
     document.getElementById('data-hora').value = obterDataHoraBrasilia();
-    document.getElementById('graduacao-nome').value = '';
     
     renderizarViaturas();
     mostrarTela('tela-identificacao');
@@ -164,15 +155,14 @@ function voltarTela(telaId) {
    ======================================== */
 
 function iniciarChecklist() {
-    estado.responsavel = document.getElementById('graduacao-nome').value.trim();
     estado.dataHora = document.getElementById('data-hora').value;
 
-    if (!estado.responsavel) {
-        alert('Por favor, insira sua graduação e nome de guerra.');
+    if (!estado.dataHora) {
+        alert('Por favor, selecione a data e hora.');
         return;
     }
 
-    atualizarProgressoViaturas();
+    renderizarViaturas();
     mostrarTela('tela-viaturas');
 }
 
@@ -185,19 +175,55 @@ function renderizarViaturas() {
     container.innerHTML = '';
 
     DADOS.viaturas.forEach(viatura => {
-        const concluido = estado.checklistsCompletos[viatura.id]?.concluido;
         const card = document.createElement('div');
-        card.className = `viatura-card ${concluido ? 'viatura-concluida' : ''}`;
-        card.onclick = () => selecionarViatura(viatura);
+        card.className = 'viatura-card';
+        card.onclick = () => abrirModalResponsavel(viatura);
         card.innerHTML = `
             <div class="viatura-icone">${viatura.icone}</div>
             <div class="viatura-info">
                 <h3>${viatura.codigo}</h3>
                 <p>${viatura.nome}</p>
             </div>
-            ${concluido ? '<div class="viatura-check">✓</div>' : ''}
+            <div class="viatura-seta">→</div>
         `;
         container.appendChild(card);
+    });
+}
+
+/* ========================================
+   MODAL DE RESPONSÁVEL
+   ======================================== */
+
+function abrirModalResponsavel(viatura) {
+    estado.viaturaPendente = viatura;
+    document.getElementById('modal-viatura-nome').textContent = viatura.codigo + ' - ' + viatura.nome;
+    document.getElementById('modal-nome-responsavel').value = '';
+    document.getElementById('modal-responsavel').style.display = 'flex';
+}
+
+function fecharModalResponsavel() {
+    estado.viaturaPendente = null;
+    document.getElementById('modal-responsavel').style.display = 'none';
+}
+
+function confirmarResponsavel() {
+    const nome = document.getElementById('modal-nome-responsavel').value.trim();
+    
+    if (!nome) {
+        alert('Por favor, informe seu nome.');
+        return;
+    }
+    
+    estado.responsavel = nome;
+    
+    // Salvar responsável para esta viatura
+    estado.checklistsCompletos[estado.viaturaPendente.id] = {
+        responsavel: nome
+    };
+    
+    fecharModalResponsavel();
+    selecionarViatura(estado.viaturaPendente);
+}
     });
 }
 
@@ -207,19 +233,14 @@ function selecionarViatura(viatura) {
     const categorias = obterCategoriasViatura();
     estado.categoriaAtiva = categorias.length > 0 ? categorias[0].id : null;
 
-    // Verificar se já existe checklist salvo para esta viatura
-    if (estado.checklistsCompletos[viatura.id]) {
-        estado.checklist = JSON.parse(JSON.stringify(estado.checklistsCompletos[viatura.id].checklist));
-    } else {
-        estado.checklist = {};
-        // Inicializar checklist com quantidade 0 (desmarcado)
-        obterTodosMateriaisViatura().forEach(material => {
-            estado.checklist[material.id] = {
-                qtdAtual: 0,
-                obs: ''
-            };
-        });
-    }
+    // Inicializar checklist com quantidade 0 (desmarcado)
+    estado.checklist = {};
+    obterTodosMateriaisViatura().forEach(material => {
+        estado.checklist[material.id] = {
+            qtdAtual: 0,
+            obs: ''
+        };
+    });
 
     document.getElementById('titulo-viatura').textContent = viatura.codigo;
     renderizarAbas();
@@ -295,6 +316,291 @@ function alterarQuantidade(materialId, delta) {
 
 function atualizarObs(materialId, obs) {
     estado.checklist[materialId].obs = obs;
+}
+
+/* ========================================
+   FINALIZAR E GERAR RELATÓRIO INDIVIDUAL
+   ======================================== */
+
+function finalizarEGerarRelatorio() {
+    // Salvar checklist da viatura atual
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const responsavel = estado.checklistsCompletos[viatura.id]?.responsavel || estado.responsavel;
+    
+    estado.checklistsCompletos[estado.viaturaSelecionada] = {
+        viatura: viatura,
+        responsavel: responsavel,
+        checklist: JSON.parse(JSON.stringify(estado.checklist)),
+        concluido: true
+    };
+    
+    // Abrir tela de assinatura
+    abrirTelaAssinaturaIndividual();
+}
+
+function abrirTelaAssinaturaIndividual() {
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const responsavel = estado.checklistsCompletos[viatura.id]?.responsavel || estado.responsavel;
+    
+    // Preencher informações
+    document.getElementById('info-viatura').textContent = viatura.codigo + ' - ' + viatura.nome;
+    document.getElementById('info-responsavel').textContent = responsavel;
+    document.getElementById('info-datahora').textContent = formatarDataHora(estado.dataHora);
+    
+    // Limpar assinatura anterior
+    limparAssinatura();
+    
+    // Reajustar canvas ao mostrar tela
+    setTimeout(() => {
+        if (canvasAssinatura) {
+            const container = canvasAssinatura.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvasAssinatura.width = rect.width;
+            canvasAssinatura.height = 200;
+            ctxAssinatura.strokeStyle = '#1f2937';
+            ctxAssinatura.lineWidth = 3;
+            ctxAssinatura.lineCap = 'round';
+            ctxAssinatura.lineJoin = 'round';
+        }
+    }, 100);
+    
+    mostrarTela('tela-assinatura');
+}
+
+async function confirmarAssinaturaIndividual() {
+    if (assinaturaVazia) {
+        alert('Por favor, assine antes de confirmar.');
+        return;
+    }
+    
+    // Capturar assinatura
+    estado.assinaturaDataURL = canvasAssinatura.toDataURL('image/png');
+    
+    // Gerar ID único e hash
+    estado.documentoId = gerarIdUnico();
+    
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const responsavel = estado.checklistsCompletos[viatura.id]?.responsavel || estado.responsavel;
+    
+    const dadosParaHash = {
+        id: estado.documentoId,
+        viatura: viatura.codigo,
+        responsavel: responsavel,
+        dataHora: estado.dataHora,
+        checklist: estado.checklist,
+        timestamp: Date.now()
+    };
+    
+    estado.documentoHash = await gerarHashDocumento(dadosParaHash);
+    
+    // Salvar no Supabase
+    await salvarNoSupabaseIndividual();
+    
+    // Gerar PDF individual
+    await gerarPDFIndividual();
+}
+
+async function salvarNoSupabaseIndividual() {
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const responsavel = estado.checklistsCompletos[viatura.id]?.responsavel || estado.responsavel;
+    
+    const dadosChecklist = {
+        id: estado.documentoId,
+        responsavel: responsavel,
+        data_hora: estado.dataHora,
+        viaturas_verificadas: viatura.codigo,
+        total_viaturas: 1,
+        completo: true,
+        hash: estado.documentoHash,
+        dados_checklist: JSON.stringify({
+            viatura: viatura,
+            checklist: estado.checklist,
+            responsavel: responsavel
+        }),
+        assinatura: estado.assinaturaDataURL
+    };
+    
+    if (typeof salvarChecklistNoBanco === 'function') {
+        const resultado = await salvarChecklistNoBanco(dadosChecklist);
+        if (resultado.success) {
+            console.log('✅ Checklist salvo com sucesso!');
+        } else if (resultado.offline) {
+            console.log('📴 Modo offline - checklist será sincronizado depois');
+        }
+    }
+}
+
+async function gerarPDFIndividual() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    const margemEsquerda = 20;
+    let y = 20;
+    
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const responsavel = estado.checklistsCompletos[viatura.id]?.responsavel || estado.responsavel;
+
+    // Título
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CHECKLIST DE VIATURA', 105, y, { align: 'center' });
+    y += 10;
+
+    doc.setFontSize(14);
+    doc.setTextColor(220, 38, 38);
+    doc.text(viatura.codigo + ' - ' + viatura.nome, 105, y, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+    y += 15;
+
+    // ID do documento
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 100, 100);
+    doc.text(`ID: ${estado.documentoId}`, 105, y, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
+    y += 15;
+
+    // Informações
+    doc.setFontSize(11);
+    doc.text(`Responsável: ${responsavel}`, margemEsquerda, y);
+    y += 7;
+    doc.text(`Data/Hora: ${formatarDataHora(estado.dataHora)}`, margemEsquerda, y);
+    y += 15;
+
+    // Linha separadora
+    doc.setLineWidth(0.5);
+    doc.line(margemEsquerda, y, 190, y);
+    y += 10;
+
+    // Categorias e itens
+    obterCategoriasViatura(viatura.id).forEach(categoria => {
+        if (y > 250) {
+            doc.addPage();
+            y = 20;
+        }
+
+        const materiais = obterMateriaisCategoria(categoria.id, viatura.id) || [];
+
+        // Título da categoria
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'bold');
+        doc.setFillColor(220, 38, 38);
+        doc.rect(margemEsquerda, y - 4, 170, 7, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.text(categoria.nome, margemEsquerda + 3, y);
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'normal');
+
+        materiais.forEach(material => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+
+            const itemEstado = estado.checklist[material.id];
+            if (!itemEstado) return;
+            
+            const isOk = itemEstado.qtdAtual >= material.qtdEsperada;
+            const status = `${itemEstado.qtdAtual}/${material.qtdEsperada}`;
+            const obs = itemEstado.obs ? ` (${itemEstado.obs})` : '';
+
+            if (isOk) {
+                doc.setTextColor(22, 163, 74);
+            } else {
+                doc.setTextColor(220, 38, 38);
+            }
+
+            doc.text(`• ${material.nome}${obs}`, margemEsquerda + 3, y);
+            doc.text(status, 180, y, { align: 'right' });
+            doc.setTextColor(0, 0, 0);
+            y += 5;
+        });
+        y += 5;
+    });
+
+    // Nova página para assinatura
+    doc.addPage();
+    y = 30;
+
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TERMO DE VERIFICAÇÃO', 105, y, { align: 'center' });
+    y += 20;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    const textoTermo = `Declaro que realizei a verificação da viatura ${viatura.codigo}, conferindo os materiais e equipamentos conforme os itens especificados. Este documento foi assinado digitalmente e pode ser verificado através do QR Code.`;
+    const linhasTexto = doc.splitTextToSize(textoTermo, 160);
+    doc.text(linhasTexto, margemEsquerda, y);
+    y += 30;
+
+    // Assinatura
+    if (estado.assinaturaDataURL) {
+        doc.text('Assinatura Digital:', margemEsquerda, y);
+        y += 5;
+        doc.addImage(estado.assinaturaDataURL, 'PNG', margemEsquerda, y, 80, 40);
+        y += 45;
+    }
+
+    doc.text(responsavel, margemEsquerda, y);
+    y += 5;
+    doc.setFontSize(9);
+    doc.setTextColor(100, 100, 100);
+    doc.text(formatarDataHora(estado.dataHora), margemEsquerda, y);
+    doc.setTextColor(0, 0, 0);
+
+    // QR Code para verificação
+    try {
+        const urlVerificacao = `${window.location.origin}/verificar.html?id=${estado.documentoId}&hash=${estado.documentoHash}`;
+        
+        const qrContainer = document.createElement('div');
+        qrContainer.style.position = 'absolute';
+        qrContainer.style.left = '-9999px';
+        document.body.appendChild(qrContainer);
+        
+        const qr = new QRCode(qrContainer, {
+            text: urlVerificacao,
+            width: 150,
+            height: 150,
+            colorDark: '#000000',
+            colorLight: '#ffffff'
+        });
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const qrCanvas = qrContainer.querySelector('canvas');
+        if (qrCanvas) {
+            const qrDataURL = qrCanvas.toDataURL('image/png');
+            doc.addImage(qrDataURL, 'PNG', 140, y - 50, 40, 40);
+            doc.setFontSize(8);
+            doc.text('Escaneie para verificar', 160, y - 5, { align: 'center' });
+        }
+        
+        document.body.removeChild(qrContainer);
+    } catch (e) {
+        console.log('QR Code não disponível:', e);
+    }
+
+    // Rodapé
+    doc.setFontSize(8);
+    doc.setTextColor(128, 128, 128);
+    doc.text(`ID: ${estado.documentoId}`, 105, 280, { align: 'center' });
+    doc.text(`Hash: ${estado.documentoHash.substring(0, 32)}...`, 105, 285, { align: 'center' });
+
+    // Salvar
+    const dataArquivo = estado.dataHora.replace(/[:-]/g, '').replace('T', '_');
+    doc.save(`Checklist_${viatura.codigo}_${dataArquivo}.pdf`);
+    
+    // Mostrar confirmação e voltar ao início
+    alert(`✅ Checklist salvo com sucesso!\n\nViatura: ${viatura.codigo}\nResponsável: ${responsavel}\nID: ${estado.documentoId}\n\nO PDF foi gerado com assinatura digital e QR Code de verificação.`);
+    
+    // Resetar e voltar ao início
+    resetarEstado();
+    document.getElementById('data-hora').value = obterDataHoraBrasilia();
+    mostrarTela('tela-identificacao');
 }
 
 function finalizarChecklist() {

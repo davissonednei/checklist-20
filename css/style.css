@@ -764,3 +764,98 @@ body {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* ========================================
+   MODAL DE RESPONSÁVEL
+   ======================================== */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: var(--sombra-lg);
+    animation: modalSlide 0.3s ease;
+}
+
+@keyframes modalSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-content h3 {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.modal-content p {
+    color: var(--cor-texto-claro);
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.modal-content .campo {
+    margin-bottom: 20px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--cor-borda);
+    border-radius: 10px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.modal-content input:focus {
+    outline: none;
+    border-color: var(--cor-primaria);
+}
+
+.modal-acoes {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-acoes .btn {
+    flex: 1;
+}
+
+/* ========================================
+   INSTRUÇÃO E SETA NA VIATURA
+   ======================================== */
+
+.instrucao-viaturas {
+    text-align: center;
+    color: var(--cor-texto-claro);
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.viatura-seta {
+    font-size: 1.5rem;
+    color: var(--cor-primaria);
+    font-weight: bold;
+}
