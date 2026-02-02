@@ -119,8 +119,6 @@ function inicializarApp() {
     // Mostrar status de conexão
     atualizarStatusConexao();
 }
-    atualizarStatusConexao();
-
 
 function resetarEstado() {
     estado.responsavel = '';
@@ -186,9 +184,25 @@ function iniciarChecklist() {
 
 function renderizarViaturas() {
     const container = document.getElementById('lista-viaturas');
+    console.log('renderizarViaturas chamada');
+    console.log('Container:', container);
+    console.log('DADOS:', typeof DADOS, DADOS);
+    console.log('DADOS.viaturas:', DADOS?.viaturas);
+    
+    if (!container) {
+        console.error('ERRO: Container lista-viaturas não encontrado!');
+        return;
+    }
+    
+    if (!DADOS || !DADOS.viaturas) {
+        console.error('ERRO: DADOS.viaturas não existe!');
+        return;
+    }
+    
     container.innerHTML = '';
 
     DADOS.viaturas.forEach(viatura => {
+        console.log('Renderizando viatura:', viatura);
         const card = document.createElement('div');
         card.className = 'viatura-card';
         card.onclick = () => abrirModalResponsavel(viatura);
@@ -209,10 +223,12 @@ function renderizarViaturas() {
    ======================================== */
 
 function abrirModalResponsavel(viatura) {
+    console.log('abrirModalResponsavel chamada com:', viatura);
     estado.viaturaPendente = viatura;
     document.getElementById('modal-viatura-nome').textContent = viatura.codigo + ' - ' + viatura.nome;
     document.getElementById('modal-nome-responsavel').value = '';
     document.getElementById('modal-responsavel').style.display = 'flex';
+    console.log('Modal exibido');
 }
 
 function fecharModalResponsavel() {
@@ -221,7 +237,10 @@ function fecharModalResponsavel() {
 }
 
 function confirmarResponsavel() {
+    console.log('confirmarResponsavel chamada');
+    console.log('viaturaPendente:', estado.viaturaPendente);
     const nome = document.getElementById('modal-nome-responsavel').value.trim();
+    console.log('Nome digitado:', nome);
     
     if (!nome) {
         alert('Por favor, informe seu nome.');
@@ -230,24 +249,33 @@ function confirmarResponsavel() {
     
     estado.responsavel = nome;
     
+    // Salvar a viatura ANTES de fechar o modal (que limpa viaturaPendente)
+    const viatura = estado.viaturaPendente;
+    
     // Salvar responsável para esta viatura
-    estado.checklistsCompletos[estado.viaturaPendente.id] = {
+    estado.checklistsCompletos[viatura.id] = {
         responsavel: nome
     };
     
     fecharModalResponsavel();
-    selecionarViatura(estado.viaturaPendente);
+    console.log('Chamando selecionarViatura com:', viatura);
+    selecionarViatura(viatura);
 }
 
 function selecionarViatura(viatura) {
+    console.log('selecionarViatura chamada com:', viatura);
     estado.viaturaSelecionada = viatura.id;
     // Definir categoria ativa para a primeira da viatura
     const categorias = obterCategoriasViatura();
+    console.log('Categorias da viatura:', categorias);
     estado.categoriaAtiva = categorias.length > 0 ? categorias[0].id : null;
+    console.log('Categoria ativa:', estado.categoriaAtiva);
 
     // Inicializar checklist com quantidade 0 (desmarcado)
     estado.checklist = {};
-    obterTodosMateriaisViatura().forEach(material => {
+    const materiais = obterTodosMateriaisViatura();
+    console.log('Materiais da viatura:', materiais);
+    materiais.forEach(material => {
         estado.checklist[material.id] = {
             qtdAtual: 0,
             obs: ''
