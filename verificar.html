@@ -7,22 +7,22 @@
     <link rel="stylesheet" href="css/style.css">
     <style>
         .verificacao-container {
-            max-width: 500px;
-            margin: 40px auto;
-            padding: 20px;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 16px;
         }
 
         .status-card {
             background: white;
             border-radius: 16px;
-            padding: 32px;
+            padding: 24px;
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .status-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+            font-size: 56px;
+            margin-bottom: 12px;
         }
 
         .status-valido {
@@ -34,22 +34,45 @@
         }
 
         .status-titulo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             margin-bottom: 8px;
         }
 
         .status-subtitulo {
             color: #6b7280;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alerta-comparacao {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .alerta-comparacao h4 {
+            color: #b45309;
+            margin: 0 0 8px 0;
+            font-size: 14px;
+        }
+
+        .alerta-comparacao p {
+            color: #92400e;
+            margin: 0;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         .detalhes-documento {
             text-align: left;
             background: #f3f4f6;
             border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
+            padding: 16px;
+            margin-top: 16px;
         }
 
         .detalhe-item {
@@ -65,12 +88,12 @@
 
         .detalhe-label {
             color: #6b7280;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .detalhe-valor {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .loading {
@@ -93,15 +116,100 @@
             to { transform: rotate(360deg); }
         }
 
+        .dados-completos {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .dados-completos h3 {
+            font-size: 16px;
+            color: #374151;
+            margin-bottom: 12px;
+            border-bottom: 2px solid #dc2626;
+            padding-bottom: 8px;
+        }
+
+        .viatura-section {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .viatura-header {
+            background: #dc2626;
+            color: white;
+            padding: 10px 12px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .categoria-section {
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .categoria-header {
+            background: #f9fafb;
+            padding: 8px 12px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .item-checklist {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .item-nome {
+            color: #374151;
+        }
+
+        .item-qtd-ok {
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .item-qtd-falta {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .item-obs {
+            color: #6b7280;
+            font-style: italic;
+            font-size: 11px;
+        }
+
         .hash-display {
             font-family: monospace;
-            font-size: 10px;
+            font-size: 9px;
             word-break: break-all;
             background: #1f2937;
             color: #10b981;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             margin-top: 16px;
+        }
+
+        .instrucao-final {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .instrucao-final p {
+            color: #1e40af;
+            font-size: 13px;
+            margin: 0;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -113,12 +221,6 @@
                 <p>Verificando documento...</p>
             </div>
         </div>
-    </div>
-
-    <div id="upload-section" style="display:none; margin-top:32px;">
-        <label for="pdf-upload"><strong>Verificar autenticidade de um arquivo PDF:</strong></label><br>
-        <input type="file" id="pdf-upload" accept="application/pdf">
-        <div id="upload-status"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -216,10 +318,23 @@
             const dataFormatada = new Date(doc.data_hora).toLocaleString('pt-BR', { hour12: false });
             const dataCriacao = new Date(doc.created_at).toLocaleString('pt-BR', { hour12: false });
 
-            container.innerHTML = `
+            // Tentar parsear os dados do checklist
+            let dadosChecklist = null;
+            try {
+                dadosChecklist = JSON.parse(doc.dados_checklist);
+            } catch (e) {
+                console.log('Não foi possível parsear dados do checklist');
+            }
+
+            let html = `
                 <div class="status-icon status-valido">✓</div>
-                <h2 class="status-titulo">Documento Autêntico</h2>
-                <p class="status-subtitulo">Este checklist foi verificado e é válido</p>
+                <h2 class="status-titulo">Documento Registrado</h2>
+                <p class="status-subtitulo">Este checklist está registrado no sistema</p>
+                
+                <div class="alerta-comparacao">
+                    <h4>⚠️ IMPORTANTE - COMO VERIFICAR:</h4>
+                    <p>Compare TODOS os dados abaixo com o documento em mãos. Se houver QUALQUER diferença (nome, data, quantidades), o documento foi <strong>ADULTERADO</strong>.</p>
+                </div>
                 
                 <div class="detalhes-documento">
                     <div class="detalhe-item">
@@ -231,7 +346,7 @@
                         <span class="detalhe-valor">${doc.responsavel}</span>
                     </div>
                     <div class="detalhe-item">
-                        <span class="detalhe-label">Data/Hora do Checklist</span>
+                        <span class="detalhe-label">Data/Hora</span>
                         <span class="detalhe-valor">${dataFormatada}</span>
                     </div>
                     <div class="detalhe-item">
@@ -239,15 +354,80 @@
                         <span class="detalhe-valor">${doc.viaturas_verificadas || 'N/A'}</span>
                     </div>
                     <div class="detalhe-item">
+                        <span class="detalhe-label">Status</span>
+                        <span class="detalhe-valor">${doc.completo ? '✅ Completo' : '⚠️ Incompleto'}</span>
+                    </div>
+                    <div class="detalhe-item">
                         <span class="detalhe-label">Registrado em</span>
                         <span class="detalhe-valor">${dataCriacao}</span>
                     </div>
                 </div>
+            `;
+
+            // Se tiver dados detalhados do checklist, mostrar
+            if (dadosChecklist) {
+                html += `
+                    <div class="dados-completos">
+                        <h3>📋 DADOS COMPLETOS DO CHECKLIST</h3>
+                        <p style="font-size:12px;color:#6b7280;margin-bottom:12px;">Compare item por item com o documento:</p>
+                `;
+
+                // Iterar sobre cada viatura
+                for (const [viaturaId, dados] of Object.entries(dadosChecklist)) {
+                    const viatura = dados.viatura;
+                    html += `
+                        <div class="viatura-section">
+                            <div class="viatura-header">🚗 ${viatura.codigo} - ${viatura.nome}</div>
+                    `;
+
+                    // Iterar sobre categorias
+                    if (viatura.categorias) {
+                        viatura.categorias.forEach(categoria => {
+                            const materiais = viatura.materiais[categoria.id] || [];
+                            if (materiais.length === 0) return;
+
+                            html += `
+                                <div class="categoria-section">
+                                    <div class="categoria-header">${categoria.icone || '📦'} ${categoria.nome}</div>
+                            `;
+
+                            materiais.forEach(material => {
+                                const itemEstado = dados.checklist[material.id];
+                                if (!itemEstado) return;
+
+                                const isOk = itemEstado.qtdAtual >= material.qtdEsperada;
+                                const classeQtd = isOk ? 'item-qtd-ok' : 'item-qtd-falta';
+                                const obs = itemEstado.obs ? `<span class="item-obs"> (${itemEstado.obs})</span>` : '';
+
+                                html += `
+                                    <div class="item-checklist">
+                                        <span class="item-nome">${material.nome}${obs}</span>
+                                        <span class="${classeQtd}">${itemEstado.qtdAtual}/${material.qtdEsperada}</span>
+                                    </div>
+                                `;
+                            });
+
+                            html += `</div>`;
+                        });
+                    }
+
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+            }
+
+            html += `
+                <div class="instrucao-final">
+                    <p>🔍 Se todos os dados acima conferem com o documento impresso, ele é <strong>AUTÊNTICO</strong>.</p>
+                </div>
 
                 <div class="hash-display">
-                    🔐 Hash: ${doc.hash || 'N/A'}
+                    🔐 Hash de verificação: ${doc.hash || 'N/A'}
                 </div>
             `;
+
+            container.innerHTML = html;
         }
 
         function mostrarInvalido() {
