@@ -31,6 +31,26 @@ function obterDataHoraBrasilia() {
     return `${ano}-${mes}-${dia}T${hora}:${minuto}`;
 }
 
+// Funções helper para acessar dados da viatura
+function obterCategoriasViatura() {
+    if (!estado.viaturaSelecionada) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    return viatura ? viatura.categorias : [];
+}
+
+function obterMateriaisCategoria(categoriaId) {
+    if (!estado.viaturaSelecionada) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    return viatura && viatura.materiais[categoriaId] ? viatura.materiais[categoriaId] : [];
+}
+
+function obterTodosMateriaisViatura() {
+    if (!estado.viaturaSelecionada) return [];
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    if (!viatura || !viatura.materiais) return [];
+    return Object.values(viatura.materiais).flat();
+}
+
 // Estado global da aplicação
 const estado = {
     responsavel: '',
@@ -186,7 +206,7 @@ function selecionarViatura(viatura) {
     } else {
         estado.checklist = {};
         // Inicializar checklist com valores esperados
-        Object.values(DADOS.materiais).flat().forEach(material => {
+        obterTodosMateriaisViatura().forEach(material => {
             estado.checklist[material.id] = {
                 qtdAtual: material.qtdEsperada,
                 obs: ''
@@ -208,7 +228,7 @@ function renderizarAbas() {
     const container = document.getElementById('abas-categorias');
     container.innerHTML = '';
 
-    DADOS.categorias.forEach(categoria => {
+    obterCategoriasViatura().forEach(categoria => {
         const aba = document.createElement('button');
         aba.className = `aba ${categoria.id === estado.categoriaAtiva ? 'ativa' : ''}`;
         aba.onclick = () => {
@@ -223,7 +243,7 @@ function renderizarAbas() {
 
 function renderizarChecklist() {
     const container = document.getElementById('conteudo-checklist');
-    const materiais = DADOS.materiais[estado.categoriaAtiva] || [];
+    const materiais = obterMateriaisCategoria(estado.categoriaAtiva);
 
     container.innerHTML = '';
 
@@ -377,8 +397,8 @@ function renderizarResumo() {
         </div>
     `;
 
-    DADOS.categorias.forEach(categoria => {
-        const materiais = DADOS.materiais[categoria.id] || [];
+    obterCategoriasViatura().forEach(categoria => {
+        const materiais = obterMateriaisCategoria(categoria.id) || [];
 
         html += `<div class="resumo-categoria">
             <h4>${categoria.icone} ${categoria.nome}</h4>`;
@@ -450,14 +470,14 @@ function gerarPDF() {
     y += 12;
 
     // Categorias e itens
-    DADOS.categorias.forEach(categoria => {
+    obterCategoriasViatura().forEach(categoria => {
         // Verificar se precisa de nova página
         if (y > 260) {
             doc.addPage();
             y = 20;
         }
 
-        const materiais = DADOS.materiais[categoria.id] || [];
+        const materiais = obterMateriaisCategoria(categoria.id) || [];
 
         // Título da categoria
         doc.setFontSize(12);
@@ -615,13 +635,13 @@ function gerarPDFCompleto(incompleto = false) {
         y += 10;
 
         // Categorias e itens
-        DADOS.categorias.forEach(categoria => {
+        obterCategoriasViatura().forEach(categoria => {
             if (y > 260) {
                 doc.addPage();
                 y = 20;
             }
 
-            const materiais = DADOS.materiais[categoria.id] || [];
+            const materiais = obterMateriaisCategoria(categoria.id) || [];
 
             // Título da categoria
             doc.setFontSize(11);
@@ -720,8 +740,8 @@ function compartilharWhatsApp() {
 
     let temProblema = false;
 
-    DADOS.categorias.forEach(categoria => {
-        const materiais = DADOS.materiais[categoria.id] || [];
+    obterCategoriasViatura().forEach(categoria => {
+        const materiais = obterMateriaisCategoria(categoria.id) || [];
         let categoriaMensagem = `*${categoria.nome}*\n`;
         let itensComProblema = [];
 
@@ -985,8 +1005,8 @@ async function gerarPDFComAssinatura() {
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
 
-        DADOS.categorias.forEach(categoria => {
-            const materiais = DADOS.materiais[categoria.id] || [];
+        obterCategoriasViatura().forEach(categoria => {
+            const materiais = obterMateriaisCategoria(categoria.id);
             materiais.forEach(material => {
                 if (y > 270) {
                     doc.addPage();
