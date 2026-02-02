@@ -2,7 +2,7 @@
    SERVICE WORKER - FUNCIONALIDADE OFFLINE
    ======================================== */
 
-const CACHE_NAME = 'checklist-viaturas-v13';
+const CACHE_NAME = 'checklist-viaturas-v60';
 const urlsToCache = [
     '/',
     '/index.html',
