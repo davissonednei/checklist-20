@@ -115,6 +115,12 @@
         </div>
     </div>
 
+    <div id="upload-section" style="display:none; margin-top:32px;">
+        <label for="pdf-upload"><strong>Verificar autenticidade de um arquivo PDF:</strong></label><br>
+        <input type="file" id="pdf-upload" accept="application/pdf">
+        <div id="upload-status"></div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
     <script>
@@ -158,6 +164,50 @@
                 mostrarValido(doc);
             } else {
                 mostrarInvalido();
+            }
+
+            // Mostrar upload se documento encontrado
+            if (resultado.success && resultado.data) {
+                document.getElementById('upload-section').style.display = 'block';
+                window.__doc_hash = resultado.data.hash;
+            }
+        });
+
+        // Função para calcular hash SHA-256 de um arquivo
+        async function calcularHashArquivo(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const arrayBuffer = e.target.result;
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                        resolve(hashHex);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        // Lidar com upload do PDF
+        document.getElementById('pdf-upload').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const status = document.getElementById('upload-status');
+            if (!file) return;
+            status.textContent = 'Calculando hash do arquivo...';
+            try {
+                const hash = await calcularHashArquivo(file);
+                if (window.__doc_hash && hash === window.__doc_hash) {
+                    status.innerHTML = '<span style="color:#16a34a;font-weight:bold;">✓ Arquivo autêntico!</span>';
+                } else {
+                    status.innerHTML = '<span style="color:#dc2626;font-weight:bold;">✗ Arquivo NÃO confere com o original!</span><br>Hash calculado: <span style="font-family:monospace;">' + hash + '</span>';
+                }
+            } catch (err) {
+                status.textContent = 'Erro ao calcular hash: ' + err;
             }
         });
 

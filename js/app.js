@@ -41,7 +41,8 @@ function obterCategoriasViatura() {
 function obterMateriaisCategoria(categoriaId) {
     if (!estado.viaturaSelecionada) return [];
     const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
-    return viatura && viatura.materiais[categoriaId] ? viatura.materiais[categoriaId] : [];
+    const chave = Number(categoriaId);
+    return viatura && viatura.materiais[chave] ? viatura.materiais[chave] : [];
 }
 
 function obterTodosMateriaisViatura() {
@@ -198,8 +199,11 @@ function renderizarViaturas() {
 }
 
 function selecionarViatura(viatura) {
-    estado.viaturaSelecionada = viatura;
-    
+    estado.viaturaSelecionada = viatura.id;
+    // Definir categoria ativa para a primeira da viatura
+    const categorias = obterCategoriasViatura();
+    estado.categoriaAtiva = categorias.length > 0 ? categorias[0].id : null;
+
     // Verificar se já existe checklist salvo para esta viatura
     if (estado.checklistsCompletos[viatura.id]) {
         estado.checklist = JSON.parse(JSON.stringify(estado.checklistsCompletos[viatura.id].checklist));
