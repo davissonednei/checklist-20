@@ -209,10 +209,10 @@ function selecionarViatura(viatura) {
         estado.checklist = JSON.parse(JSON.stringify(estado.checklistsCompletos[viatura.id].checklist));
     } else {
         estado.checklist = {};
-        // Inicializar checklist com valores esperados
+        // Inicializar checklist com quantidade 0 (desmarcado)
         obterTodosMateriaisViatura().forEach(material => {
             estado.checklist[material.id] = {
-                qtdAtual: material.qtdEsperada,
+                qtdAtual: 0,
                 obs: ''
             };
         });
@@ -296,8 +296,9 @@ function atualizarObs(materialId, obs) {
 
 function finalizarChecklist() {
     // Salvar checklist da viatura atual
-    estado.checklistsCompletos[estado.viaturaSelecionada.id] = {
-        viatura: estado.viaturaSelecionada,
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    estado.checklistsCompletos[estado.viaturaSelecionada] = {
+        viatura: viatura,
         checklist: JSON.parse(JSON.stringify(estado.checklist)),
         concluido: true
     };
@@ -308,8 +309,9 @@ function finalizarChecklist() {
 
 function salvarEVoltar() {
     // Salvar checklist da viatura atual
-    estado.checklistsCompletos[estado.viaturaSelecionada.id] = {
-        viatura: estado.viaturaSelecionada,
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    estado.checklistsCompletos[estado.viaturaSelecionada] = {
+        viatura: viatura,
         checklist: JSON.parse(JSON.stringify(estado.checklist)),
         concluido: true
     };
@@ -388,12 +390,13 @@ function tentarGerarPDFCompleto() {
 
 function renderizarResumo() {
     const container = document.getElementById('resumo-conteudo');
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
 
     const dataFormatada = formatarDataHora(estado.dataHora);
 
     let html = `
         <div class="resumo-header">
-            <h3>CHECKLIST ${estado.viaturaSelecionada.codigo}</h3>
+            <h3>CHECKLIST ${viatura.codigo}</h3>
             <p class="resumo-info">
                 <strong>Responsável:</strong> ${estado.responsavel}<br>
                 <strong>Data/Hora:</strong> ${dataFormatada}
@@ -456,8 +459,9 @@ function gerarPDF() {
     doc.text('CHECKLIST DE VIATURA', 105, y, { align: 'center' });
     y += 10;
 
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
     doc.setFontSize(14);
-    doc.text(estado.viaturaSelecionada.codigo + ' - ' + estado.viaturaSelecionada.nome, 105, y, { align: 'center' });
+    doc.text(viatura.codigo + ' - ' + viatura.nome, 105, y, { align: 'center' });
     y += 15;
 
     // Linha separadora
@@ -542,7 +546,8 @@ function gerarPDF() {
     doc.text(`Documento gerado em ${new Date().toLocaleString('pt-BR')}`, 105, 290, { align: 'center' });
 
     // Salvar PDF
-    const nomeArquivo = `Checklist_${estado.viaturaSelecionada.codigo}_${estado.dataHora.replace(/[:-]/g, '')}.pdf`;
+    const viaturaPDF = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    const nomeArquivo = `Checklist_${viaturaPDF.codigo}_${estado.dataHora.replace(/[:-]/g, '')}.pdf`;
     doc.save(nomeArquivo);
 }
 
@@ -737,8 +742,9 @@ function gerarPDFCompleto(incompleto = false) {
    ======================================== */
 
 function compartilharWhatsApp() {
-    let mensagem = `*CHECKLIST ${estado.viaturaSelecionada.codigo}*\n`;
-    mensagem += `📋 ${estado.viaturaSelecionada.nome}\n`;
+    const viatura = DADOS.viaturas.find(v => v.id === estado.viaturaSelecionada);
+    let mensagem = `*CHECKLIST ${viatura.codigo}*\n`;
+    mensagem += `📋 ${viatura.nome}\n`;
     mensagem += `👤 ${estado.responsavel}\n`;
     mensagem += `📅 ${formatarDataHora(estado.dataHora)}\n\n`;
 
