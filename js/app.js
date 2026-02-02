@@ -93,13 +93,22 @@ function inicializarApp() {
     }
     
     // Preencher data/hora atual (fuso de Brasília)
-    document.getElementById('data-hora').value = obterDataHoraBrasilia();
+    const inputDataHora = document.getElementById('data-hora');
+    if (inputDataHora) {
+        inputDataHora.value = obterDataHoraBrasilia();
+        console.log('✓ Data/hora preenchida:', inputDataHora.value);
+    } else {
+        console.warn('⚠️ Campo data-hora não encontrado');
+    }
 
     // Event listener do formulário de identificação
-    document.getElementById('form-identificacao').addEventListener('submit', (e) => {
-        e.preventDefault();
-        iniciarChecklist();
-    });
+    const formIdentificacao = document.getElementById('form-identificacao');
+    if (formIdentificacao) {
+        formIdentificacao.addEventListener('submit', (e) => {
+            e.preventDefault();
+            iniciarChecklist();
+        });
+    }
 
     // Renderizar lista de viaturas
     renderizarViaturas();
@@ -108,6 +117,8 @@ function inicializarApp() {
     inicializarCanvasAssinatura();
     
     // Mostrar status de conexão
+    atualizarStatusConexao();
+}
     atualizarStatusConexao();
 }
 
@@ -128,7 +139,10 @@ function novoChecklist() {
     resetarEstado();
     
     // Atualizar data/hora para agora (fuso de Brasília)
-    document.getElementById('data-hora').value = obterDataHoraBrasilia();
+    const inputDataHora = document.getElementById('data-hora');
+    if (inputDataHora) {
+        inputDataHora.value = obterDataHoraBrasilia();
+    }
     
     renderizarViaturas();
     mostrarTela('tela-identificacao');
@@ -223,8 +237,6 @@ function confirmarResponsavel() {
     
     fecharModalResponsavel();
     selecionarViatura(estado.viaturaPendente);
-}
-    });
 }
 
 function selecionarViatura(viatura) {
@@ -599,7 +611,10 @@ async function gerarPDFIndividual() {
     
     // Resetar e voltar ao início
     resetarEstado();
-    document.getElementById('data-hora').value = obterDataHoraBrasilia();
+    const inputDataHora = document.getElementById('data-hora');
+    if (inputDataHora) {
+        inputDataHora.value = obterDataHoraBrasilia();
+    }
     mostrarTela('tela-identificacao');
 }
 
