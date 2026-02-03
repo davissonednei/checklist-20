@@ -221,6 +221,15 @@
                 <p>Verificando documento...</p>
             </div>
         </div>
+        <div id="upload-section" style="display:none;">
+            <div class="status-card" style="margin-top:16px;">
+                <div class="status-icon">📄</div>
+                <h2 class="status-titulo">Verificar PDF</h2>
+                <p class="status-subtitulo">Envie o PDF para comparar o hash com o registro.</p>
+                <input type="file" id="pdf-upload" accept="application/pdf">
+                <div id="upload-status" class="status-subtitulo" style="margin-top:8px;"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -270,7 +279,10 @@
 
             // Mostrar upload se documento encontrado
             if (resultado.success && resultado.data) {
-                document.getElementById('upload-section').style.display = 'block';
+                const uploadSection = document.getElementById('upload-section');
+                if (uploadSection) {
+                    uploadSection.style.display = 'block';
+                }
                 window.__doc_hash = resultado.data.hash;
             }
         });
@@ -296,22 +308,44 @@
         }
 
         // Lidar com upload do PDF
-        document.getElementById('pdf-upload').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            const status = document.getElementById('upload-status');
-            if (!file) return;
-            status.textContent = 'Calculando hash do arquivo...';
-            try {
-                const hash = await calcularHashArquivo(file);
-                if (window.__doc_hash && hash === window.__doc_hash) {
-                    status.innerHTML = '<span style="color:#16a34a;font-weight:bold;">✓ Arquivo autêntico!</span>';
-                } else {
-                    status.innerHTML = '<span style="color:#dc2626;font-weight:bold;">✗ Arquivo NÃO confere com o original!</span><br>Hash calculado: <span style="font-family:monospace;">' + hash + '</span>';
+        const pdfUpload = document.getElementById('pdf-upload');
+        if (pdfUpload) {
+            pdfUpload.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                const status = document.getElementById('upload-status');
+                if (!file || !status) return;
+                status.textContent = 'Calculando hash do arquivo...';
+                try {
+                    const hash = await calcularHashArquivo(file);
+                    if (window.__doc_hash && hash === window.__doc_hash) {
+                        status.innerHTML = '<span style="color:#16a34a;font-weight:bold;">✓ Arquivo autêntico!</span>';
+                    } else {
+                        status.innerHTML = '<span style="color:#dc2626;font-weight:bold;">✗ Arquivo NÃO confere com o original!</span><br>Hash calculado: <span style="font-family:monospace;">' + hash + '</span>';
+                    }
+                } catch (err) {
+                    status.textContent = 'Erro ao calcular hash: ' + err;
                 }
-            } catch (err) {
-                status.textContent = 'Erro ao calcular hash: ' + err;
+            });
+        }
+
+        function normalizarDadosChecklist(dadosChecklist) {
+            if (!dadosChecklist) return [];
+
+            // Checklist individual salvo como { viatura, checklist, responsavel }
+            if (dadosChecklist.viatura && dadosChecklist.checklist) {
+                return [dadosChecklist];
             }
-        });
+
+            // Checklist completo salvo como { [viaturaId]: { viatura, checklist, ... } }
+            const entradas = [];
+            Object.values(dadosChecklist).forEach(dados => {
+                if (dados && dados.viatura && dados.checklist) {
+                    entradas.push(dados);
+                }
+            });
+
+            return entradas;
+        }
 
         function mostrarValido(doc) {
             const container = document.getElementById('resultado-verificacao');
@@ -325,6 +359,8 @@
             } catch (e) {
                 console.log('Não foi possível parsear dados do checklist');
             }
+
+            const entradasChecklist = normalizarDadosChecklist(dadosChecklist);
 
             let html = `
                 <div class="status-icon status-valido">✓</div>
@@ -365,7 +401,7 @@
             `;
 
             // Se tiver dados detalhados do checklist, mostrar
-            if (dadosChecklist) {
+            if (entradasChecklist.length > 0) {
                 html += `
                     <div class="dados-completos">
                         <h3>📋 DADOS COMPLETOS DO CHECKLIST</h3>
@@ -373,15 +409,18 @@
                 `;
 
                 // Iterar sobre cada viatura
-                for (const [viaturaId, dados] of Object.entries(dadosChecklist)) {
+                for (const dados of entradasChecklist) {
                     const viatura = dados.viatura;
+                    if (!viatura) {
+                        continue;
+                    }
                     html += `
                         <div class="viatura-section">
                             <div class="viatura-header">🚗 ${viatura.codigo} - ${viatura.nome}</div>
                     `;
 
                     // Iterar sobre categorias
-                    if (viatura.categorias) {
+                    if (viatura.categorias && viatura.materiais) {
                         viatura.categorias.forEach(categoria => {
                             const materiais = viatura.materiais[categoria.id] || [];
                             if (materiais.length === 0) return;
